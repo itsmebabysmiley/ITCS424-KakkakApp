@@ -3,15 +3,15 @@ import 'package:flutter/material.dart';
 import '../constaints.dart';
 
 class HeaderWithSearchBar extends StatelessWidget {
-  const HeaderWithSearchBar({
-    Key? key,
-    required this.size,
-  }) : super(key: key);
+  final String? displayName, photoURL;
 
-  final Size size;
+  const HeaderWithSearchBar(
+      {Key? key, required this.displayName, required this.photoURL})
+      : super(key: key);
 
   @override
   Widget build(BuildContext context) {
+    Size size = MediaQuery.of(context).size;
     return Container(
       height: size.height * 0.2,
       child: Stack(
@@ -29,15 +29,24 @@ class HeaderWithSearchBar extends StatelessWidget {
             child: Row(
               children: <Widget>[
                 Text(
-                  'Hi! Nopparat Pengsuk',
+                  'Hi! $displayName',
                   style: Theme.of(context).textTheme.headline5?.copyWith(
                       color: Colors.white, fontWeight: FontWeight.bold),
                 ),
                 const Spacer(),
-                Image.asset(
-                  "assets/icons/man.png",
-                  height: 50,
-                  width: 50,
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(10),
+                  child: photoURL == null
+                      ? Image.asset(
+                          'assets/icons/man.png',
+                          height: 50,
+                          width: 50,
+                        )
+                      : Image.network(
+                          photoURL!,
+                          height: 50,
+                          width: 50,
+                        ),
                 ),
               ],
             ),

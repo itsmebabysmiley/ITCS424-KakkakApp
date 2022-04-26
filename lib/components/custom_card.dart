@@ -143,6 +143,8 @@ class CardItemWide extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     Size size = MediaQuery.of(context).size;
+    var isInCart = context.select<ShoppingCart, bool>(
+        (cart) => cart.cart.any((element) => element.equals(product)));
     return GestureDetector(
       onTap: onTap,
       child: Container(
@@ -207,7 +209,26 @@ class CardItemWide extends StatelessWidget {
                           color: cFontColor, fontWeight: FontWeight.bold),
                     ),
                     AddToCartAndBuyButton(
-                      onCartPressed: () {},
+                      onCartPressed: () {
+                        isInCart
+                              ? context.read<ShoppingCart>().increment(product)
+                              : context.read<ShoppingCart>().addToCart(product);
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: const Text('Added to the cart.'),
+                              duration: const Duration(seconds: 1),
+                              action: SnackBarAction(
+                                label: 'Undo',
+                                textColor: Colors.white,
+                                onPressed: () {
+                                  context
+                                      .read<ShoppingCart>()
+                                      .removeFromCart(product);
+                                },
+                              ),
+                            ),
+                          );
+                      },
                       onBuyPressed: () {},
                     ),
                   ],
@@ -241,9 +262,8 @@ class CardForCartItem extends StatelessWidget {
       onTap: onTap,
       child: Container(
         margin: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-        height: size.height * 0.17,
+        height: 120,
         width: size.width,
-        padding: const EdgeInsets.only(right: 10, top: 10, bottom: 10),
         decoration: BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.circular(20),
@@ -257,50 +277,49 @@ class CardForCartItem extends StatelessWidget {
         child: Row(
           children: <Widget>[
             Container(
-              margin: const EdgeInsets.only(left: 10),
-              height: 100,
-              width: 120,
+              padding: const EdgeInsets.only(right: 10),
               child: ClipRRect(
-                borderRadius: BorderRadius.circular(20),
-                child: Image.asset(product.image),
-              ),
+                  borderRadius: const BorderRadius.only(
+                      topLeft: Radius.circular(20),
+                      bottomLeft: Radius.circular(20)),
+                  child: AspectRatio(
+                    aspectRatio: 1,
+                    child: SizedBox(
+                      height: 50,
+                      width: 100,
+                      child: FittedBox(
+                        fit: BoxFit.cover,
+                        child: Image.asset(product.image),
+                      ),
+                    ),
+                  )),
             ),
             Expanded(
-              child: Container(
+              child: Padding(
                 padding:
                     const EdgeInsets.symmetric(vertical: 10, horizontal: 10),
-                margin: const EdgeInsets.only(left: 10),
                 child: Column(
-                  children: <Widget>[
-                    Row(
-                      children: <Widget>[
-                        RichText(
-                          text: TextSpan(
-                            children: [
-                              TextSpan(
-                                text: "${product.name}\n".toUpperCase(),
-                                style: Theme.of(context).textTheme.bodyText1,
-                              ),
-                              TextSpan(
-                                text: "${product.city}".toUpperCase(),
-                                style: const TextStyle(
-                                    fontSize: 12, color: Colors.grey),
-                              ),
-                            ],
-                          ),
-                        ),
-                        const Spacer(),
-                        Text(
-                          '\$${product.price.toString()}',
-                          style: Theme.of(context)
-                              .textTheme
-                              .button
-                              ?.copyWith(color: cFontColor),
-                        )
-                      ],
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Flexible(
+                      child: Text(
+                        product.name.toUpperCase(),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: Theme.of(context)
+                            .textTheme
+                            .subtitle1
+                            ?.copyWith(fontWeight: FontWeight.bold),
+                      ),
                     ),
-                    const SizedBox(
-                      height: 10,
+                    Text(
+                      product.city,
+                      style: const TextStyle(color: Colors.grey),
+                    ),
+                    Text(
+                      '\$ ${product.price.toString()}',
+                      style: Theme.of(context).textTheme.subtitle1?.copyWith(
+                          color: cFontColor, fontWeight: FontWeight.bold),
                     ),
                     Row(
                       children: <Widget>[
@@ -327,7 +346,23 @@ class CardForCartItem extends StatelessWidget {
     );
   }
 }
-
+/***
+ * Row(
+                      children: <Widget>[
+                        CouterButton(
+                          product: product,
+                        ),
+                        const Spacer(),
+                        RemoveRoundButton(
+                          onTap: () {
+                            context
+                                .read<ShoppingCart>()
+                                .removeFromCart(product);
+                          },
+                        )
+                      ],
+                    ),
+ */
 
 class AddToCartAndBuyButton extends StatelessWidget {
   final VoidCallback onCartPressed;

@@ -1,9 +1,12 @@
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
 import 'package:karkarapp/components/divider.dart';
 import 'package:karkarapp/components/round_button.dart';
 import 'package:karkarapp/components/round_input.dart';
 import 'package:karkarapp/components/round_password_input.dart';
-import 'package:karkarapp/constaints.dart';
+import 'package:karkarapp/core/auth/login.dart';
+import 'package:karkarapp/screens/home/home.dart';
 import 'package:karkarapp/screens/login/components/account_check.dart';
 import 'package:karkarapp/screens/login/components/social_button.dart';
 import 'package:karkarapp/screens/singup/sigup.dart';
@@ -18,8 +21,8 @@ class LogInPage extends StatefulWidget {
 class _LogInPageState extends State<LogInPage> {
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
-  bool _passwordVisible = true;
-
+  final Login login = Login();
+  bool _loading = false; //prevent user spam the login button.
   @override
   void dispose() {
     // Clean up the controller when the widget is disposed.
@@ -27,12 +30,17 @@ class _LogInPageState extends State<LogInPage> {
     _passwordController.dispose();
     super.dispose();
   }
+  void isLoading(bool staus){
+    setState(() {
+      _loading = staus;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
     Size size = MediaQuery.of(context).size;
     return Scaffold(
-      body: Container(
+      body: SizedBox(
         height: size.height,
         width: double.infinity,
         child: Stack(
@@ -72,32 +80,38 @@ class _LogInPageState extends State<LogInPage> {
                     passwordController: _passwordController,
                     text: 'Password',
                   ),
-                  RoundedButton(
-                    text: 'LOGIN',
-                    onPressed: () {
-                      // print(_emailController.text.toString());
-                      // print(_passwordController.text.toString());
-                      Navigator.pushNamed(context, '/home');
-                    },
-                  ),
+                  if (!_loading)
+                    RoundedButton(
+                      text: 'LOGIN',
+                      onPressed: () async {
+                        isLoading(true);
+                        await login.singInWithEmail(_emailController.text,
+                            _passwordController.text, context);
+                        isLoading(false);
+                      },
+                    ),
+                  if (_loading)
+                    const Center(
+                      child: CircularProgressIndicator(),
+                    ),
                   const XDivider(text: 'OR'),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: <Widget>[
                       SocialIcon(
                         iconPath: "assets/icons/facebook.png",
-                        onTap: () {
-                          ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-                              content: Text(
-                                  'Sorry .·´¯`(>▂<)´¯`·.  Facebook login is under developing')));
-                        },
+                        onTap: () async {
+                          isLoading(true);
+                          await login.signInWithFacebook(context);
+                          isLoading(false);
+                        }
                       ),
                       SocialIcon(
                         iconPath: "assets/icons/google.png",
-                        onTap: () {
-                          ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-                              content: Text(
-                                  'Sorry .·´¯`(>▂<)´¯`·.  Google login is under developing')));
+                        onTap: () async {
+                          isLoading(true);
+                          await login.signInWithGoogle(context);
+                          isLoading(false);
                         },
                       ),
                     ],

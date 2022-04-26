@@ -26,8 +26,9 @@ class SectionNameWithBorderColor extends StatelessWidget {
 
 class SubSection extends StatelessWidget {
   final String title;
+  final VoidCallback onTap;
   const SubSection({
-    Key? key, required this.title,
+    Key? key, required this.title,required this.onTap
   }) : super(key: key);
 
   @override
@@ -35,11 +36,7 @@ class SubSection extends StatelessWidget {
     return Column(
       children: <Widget>[
         GestureDetector(
-          onTap: (){ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                            content: Text('This feature is under developing'),
-                          ),
-                        );},
+          onTap: onTap,
           child: Container(
             padding: const EdgeInsets.only(left: 20, right: 10),
             decoration:  BoxDecoration(

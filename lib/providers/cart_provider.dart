@@ -22,7 +22,9 @@ class ShoppingCart with ChangeNotifier {
 
   void decrement(Product product) {
     final indexProduct = _shoppingCart.where((element) => element.item.id == product.id);
-    indexProduct.first.amount--;
+    if(indexProduct.first.amount > 1){
+      indexProduct.first.amount--;
+    }
     notifyListeners();
   }
 
